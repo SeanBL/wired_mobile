@@ -137,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           child: Container(
             //height: 470,
-            height: baseSize * (isTablet(context) ? 0.3 : 0.9),
+            height: baseSize * (isTablet(context) ? 0.3 : 0.7),
             decoration: BoxDecoration(
               color: Color(0xFFF9EBD9),
               borderRadius: BorderRadius.circular(7),
@@ -155,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text(
                   'Hello Testers! Welcome to WiRED\'s new mobile HealthMap app. Thank you for choosing to participate in this closed test. This does mean a lot to all of us here at WiRED. We ask that you please do not click on any button or link that says "Leave the test." We need all testers to remain opted in for 14 consecutive days. After the 14 days, you may leave the test if you wish. Once again, thank you so much for your participation in this test.',
                   style: TextStyle(
-                    fontSize: baseSize * (isTablet(context) ? (0.06) * .7 : 0.05),
+                    fontSize: baseSize * (isTablet(context) ? 0.06 : 0.045),
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
                   ),
