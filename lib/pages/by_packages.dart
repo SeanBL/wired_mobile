@@ -3,82 +3,103 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:wired_mobile/pages/package_info.dart';
 import 'package:wired_mobile/pages/policy.dart';
-import 'package:wired_mobile/pages/topic_list.dart';
-
 import '../utils/custom_app_bar.dart';
 import '../utils/custom_nav_bar.dart';
 import '../utils/functions.dart';
 import '../utils/side_nav_bar.dart';
 import 'home_page.dart';
-import 'module_by_alphabet.dart';
-import 'module_info.dart';
 import 'module_library.dart';
 
-class ByTopic extends StatefulWidget {
+class ByPackages extends StatefulWidget {
   @override
-  _ByTopicState createState() => _ByTopicState();
+  _ByPackagesState createState() => _ByPackagesState();
 }
 
-class Category {
+class Package {
   String? name;
-  int? id;
+  String? description;
+  String? downloadLink;
 
-  Category({
+
+  Package({
     this.name,
-    this.id,
+    this.description,
+    this.downloadLink,
+
   });
 
-  Category.fromJson(Map<String, dynamic> json)
+  Package.fromJson(Map<String, dynamic> json)
       : name = json['name'] as String?,
-        id = json['id'] as int;
+        description = json['description'] as String?,
+        downloadLink = json['downloadLink'] as String;
+
 
   Map<String, dynamic> toJson() => {
     'name': name,
-    'id': id,
+    'description': description,
+    'downloadLink': downloadLink,
+
   };
+
+  // // Override == operator to compare Package objects by their package field
+  // @override
+  // bool operator ==(Object other) {
+  //   if (identical(this, other)) return true;
+  //
+  //   return other is Package && other.package == package;
+  // }
+  //
+  // // Override hashCode to ensure it is consistent with the == operator
+  // @override
+  // int get hashCode => package?.hashCode ?? 0;
 }
 
-class _ByTopicState extends State<ByTopic> {
-  late Future<List<Category>> futureCategories;
+class _ByPackagesState extends State<ByPackages> {
+  late Future<List<Package>> futurePackages;
 
-  Future<List<Category>> fetchCategories() async {
+  Future<List<Package>> fetchPackages() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://10.0.2.2:3000/categories'));
+          'http://10.0.2.2:3000/packages'));
 
       debugPrint("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
+        // Check what data is being decoded
         debugPrint("Fetched Data: $data");
 
+        // Ensure that the data is a List
         if (data is List) {
           print("Data is a List");
-          List<Category> categories = data.map<Category>((e) =>
-              Category.fromJson(e)).toList();
+          List<Package> packages = data.map<Package>((e) =>
+              Package.fromJson(e)).toList();
 
-          // Filter out categories with null or empty names
-          categories = categories.where((c) => c.name != null && c.name!.isNotEmpty).toList();
+          // // Filter out packages with null or empty names
+          // packages = packages.where((p) => p.package != null &&
+          //     p.package!.isNotEmpty).toList();
 
-          // Sort the list by category name
-          categories.sort((a, b) => a.name!.toLowerCase().compareTo(b.name!.toLowerCase()));
+          // Sort the list by package name
+          packages.sort((a, b) =>
+              a.name!.toLowerCase().compareTo(b.name!.toLowerCase()));
 
           // Remove duplicates by converting to a Set and back to a List
-          categories = categories.toSet().toList();
+          packages = packages.toSet().toList();
 
-          debugPrint("Parsed Categories Length: ${categories.length}");
-          return categories;
+          debugPrint("Parsed Packages Length: ${packages.length}");
+          return packages;
         } else {
           debugPrint("Data is not a list");
         }
       } else {
         debugPrint(
-            "Failed to load categories, status code: ${response.statusCode}");
+            "Failed to load packages, status code: ${response.statusCode}");
       }
     } catch (e) {
-      debugPrint("Error fetching categories: $e");
+      debugPrint("Error fetching packages: $e");
     }
     return [];
   }
@@ -86,7 +107,7 @@ class _ByTopicState extends State<ByTopic> {
   @override
   void initState() {
     super.initState();
-    futureCategories = fetchCategories();
+    futurePackages = fetchPackages();
   }
 
   @override
@@ -196,7 +217,7 @@ class _ByTopicState extends State<ByTopic> {
           child: Column(
             children: [
               Text(
-                "Search by Topic",
+                "Search by Package",
                 style: TextStyle(
                   fontSize: screenWidth * 0.085,
                   fontWeight: FontWeight.w500,
@@ -207,7 +228,7 @@ class _ByTopicState extends State<ByTopic> {
           ),
         ),
         const SizedBox(height: 20),
-        // List of topics container
+        // List of packages container
         Stack(
           children: [
             Container(
@@ -216,49 +237,48 @@ class _ByTopicState extends State<ByTopic> {
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
-              child: FutureBuilder<List<Category>>(
-                future: futureCategories,
+              child: FutureBuilder<List<Package>>(
+                future: futurePackages,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('No categories available');
+                    return const Text('No packages available');
                   } else {
-                    final categories = snapshot.data!;
-                    debugPrint("Number of Categories: ${categories.length}");
+                    final packages = snapshot.data!;
+                    debugPrint("Number of Packages: ${packages.length}");
                     return ListView.builder(
-                      itemCount: categories.length + 1,
+                      itemCount: packages.length + 1,
                       itemBuilder: (context, index) {
-                        if (index == categories.length) {
+                        if (index == packages.length) {
                           return const SizedBox(
                             height: 160,
                           );
                         }
-                        final topic = categories[index];
-                        final topicName = topic.name ?? "Unknown Module";
-                        final categoryId = topic.id ?? 0;
+                        final package = packages[index];
+                        final packageName = package.name ?? "Unknown Module";
+                        final packageDescription = package.description ?? "Unknown Package";
+                        final downloadLink = package.downloadLink ?? "Unknown Package";
                         return Column(
                           children: [
                             InkWell(
                               onTap: () async {
                                 //print("Downloading ${moduleData[index].downloadLink}");
-                                if (topicName.isNotEmpty) {
+                                if (packageName.isNotEmpty) {
                                   // String fileName = "$moduleName.zip";
                                   // await downloadModule(downloadLink, fileName);
-                                  Navigator.push(
-                                      context, MaterialPageRoute(
-                                        builder: (context) => TopicList(
-                                          category: topicName,
-                                          categoryId: categoryId,
-                                        )
-                                    )
-                                  );
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) => PackageInfo(
+                                          packageName: packageName,
+                                          packageDescription: packageDescription,
+                                          downloadLink: downloadLink,
+                                      )));
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(
-                                        'No category found for ${categories[index]
+                                        'No package found for ${packages[index]
                                             .name}')),
                                   );
                                 }
@@ -269,7 +289,7 @@ class _ByTopicState extends State<ByTopic> {
                                     padding: const EdgeInsets.only(
                                         top: 10, bottom: 10),
                                     child: Text(
-                                      topicName,
+                                      packageName,
                                       style: TextStyle(
                                         fontSize: screenWidth * 0.074,
                                         fontWeight: FontWeight.w500,
@@ -334,7 +354,7 @@ class _ByTopicState extends State<ByTopic> {
           child: Column(
             children: [
               Text(
-                "Search by Topic",
+                "Search by Package",
                 style: TextStyle(
                   fontSize: baseSize * (isTablet(context) ? 0.07 : 0.07),
                   fontWeight: FontWeight.w500,
@@ -347,7 +367,7 @@ class _ByTopicState extends State<ByTopic> {
         SizedBox(
           height: baseSize * (isTablet(context) ? 0.015 : 0.015),
         ),
-        // List of topics container
+        // List of packages container
         Stack(
           children: [
             Container(
@@ -356,44 +376,47 @@ class _ByTopicState extends State<ByTopic> {
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
-              child: FutureBuilder<List<Category>>(
-                future: futureCategories,
+              child: FutureBuilder<List<Package>>(
+                future: futurePackages,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('No categories available');
+                    return const Text('No packages available');
                   } else {
-                    final categories = snapshot.data!;
-                    debugPrint("Number of Categories: ${categories.length}");
+                    final packages = snapshot.data!;
+                    debugPrint("Number of Packages: ${packages.length}");
                     return ListView.builder(
-                      itemCount: categories.length + 1,
+                      itemCount: packages.length + 1,
                       itemBuilder: (context, index) {
-                        if (index == categories.length) {
+                        if (index == packages.length) {
                           return const SizedBox(
                             height: 160,
                           );
                         }
-                        final topic = categories[index];
-                        final topicName = topic.name ?? "Unknown Module";
-                        final categoryId = topic.id ?? 0;
+                        final package = packages[index];
+                        final packageName = package.name ?? "Unknown Module";
+                        final packageDescription = package.description ?? "Unknown Package";
+                        final downloadLink = package.downloadLink ?? "Unknown Package";
                         return Column(
                           children: [
                             InkWell(
                               onTap: () async {
                                 //print("Downloading ${moduleData[index].downloadLink}");
-                                if (topicName.isNotEmpty) {
+                                if (packageName.isNotEmpty) {
                                   // String fileName = "$moduleName.zip";
                                   // await downloadModule(downloadLink, fileName);
                                   Navigator.push(context, MaterialPageRoute(
-                                      builder: (context) => TopicList(
-                                          category: topicName, categoryId: categoryId,)));
+                                      builder: (context) => PackageInfo(
+                                        packageName: packageName,
+                                        packageDescription: packageDescription,
+                                        downloadLink: downloadLink,)));
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(
-                                        'No category found for ${categories[index]
+                                        'No package found for ${packages[index]
                                             .name}')),
                                   );
                                 }
@@ -404,7 +427,7 @@ class _ByTopicState extends State<ByTopic> {
                                     padding: const EdgeInsets.only(
                                         top: 10, bottom: 10),
                                     child: Text(
-                                      topicName,
+                                      packageName,
                                       style: TextStyle(
                                         fontSize: baseSize * (isTablet(context) ? 0.0667 : 0.0667),
                                         fontFamilyFallback: [
@@ -465,5 +488,3 @@ class _ByTopicState extends State<ByTopic> {
     );
   }
 }
-
-

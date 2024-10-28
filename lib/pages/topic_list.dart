@@ -10,71 +10,74 @@ import '../utils/custom_app_bar.dart';
 import '../utils/custom_nav_bar.dart';
 import '../utils/functions.dart';
 import '../utils/side_nav_bar.dart';
+import 'by_topic.dart';
 import 'home_page.dart';
 import 'module_library.dart';
 
 class TopicList extends StatefulWidget {
   final String category;
-  final String topicName;
+  final int categoryId;
 
-  const TopicList({Key? key, required this.category, required this.topicName}) : super(key: key);
+  const TopicList({Key? key, required this.category, required this.categoryId}) : super(key: key);
   @override
   _TopicListState createState() => _TopicListState();
 }
 
-class Topic {
+class SubCategory {
   String? name;
-  String? category;
-  String? id;
+  int? categoryId;
+  int? subcategoryId;
 
-  Topic({
+  SubCategory({
     this.name,
-    this.category,
-    this.id,
+    this.categoryId,
+    this.subcategoryId,
   });
 
-  Topic.fromJson(Map<String, dynamic> json)
-      : name = json['name'] as String?,
-        category = json['category'] as String?,
-        id = json['id'] as String;
+  SubCategory.fromJson(Map<String, dynamic> json) {
+    name = json['name'] as String?;
+    categoryId = json['category_id'] as int?; // Convert category_id to string if it's an int
+    subcategoryId = json['id'] as int; // Convert id to string if necessary
+  }
 
   Map<String, dynamic> toJson() => {
     'name': name,
-    'category': category,
-    'id': id,
+    'categoryId': categoryId,
+    'subcategoryId': subcategoryId,
   };
 }
 
 class _TopicListState extends State<TopicList> {
-  late Future<List<Topic>> futureTopics;
+  late Future<List<SubCategory>> futureSubcategories;
   List<String> topicNames = [];
 
-  Future<List<Topic>> fetchTopics() async {
+  Future<List<SubCategory>> fetchSubcategories() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://obrpqbo4eb.execute-api.us-west-2.amazonaws.com/api/topics'));
+          'http://10.0.2.2:3000/subCategories'));
 
       debugPrint("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
+        //final List<dynamic> data = jsonDecode(response.body);
         // Check what data is being decoded
         debugPrint("Fetched Data: $data");
 
         // Ensure that the data is a List
         if (data is List) {
           print("Data is a List");
-          List<Topic> topics = data.map<Topic>((e) => Topic.fromJson(e)).toList();
+          List<SubCategory> subCategories = data.map<SubCategory>((e) => SubCategory.fromJson(e)).toList();
 
-          // Filter topics based on the widget.category
-          topics = topics.where((topic) => topic.category == widget.category).toList();
+          List<SubCategory> filteredSubCategories = subCategories
+              .where((subCategory) => subCategory.categoryId == widget.categoryId)
+              .toList();
 
           // Sort the topics by name
-          topics.sort((a, b) => a.name!.compareTo(b.name!));
+          filteredSubCategories.sort((a, b) => a.name!.compareTo(b.name!));
 
-          debugPrint("Parsed Topics Length: ${topics.length}");
-          return topics;
+          debugPrint("Parsed Topics Length: ${subCategories.length}");
+          return filteredSubCategories;
         } else {
           debugPrint("Data is not a list");
         }
@@ -90,7 +93,7 @@ class _TopicListState extends State<TopicList> {
   @override
   void initState() {
     super.initState();
-    futureTopics = fetchTopics();
+    futureSubcategories = fetchSubcategories();
   }
 
   @override
@@ -223,49 +226,48 @@ class _TopicListState extends State<TopicList> {
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
-              child: FutureBuilder<List<Topic>>(
-                future: futureTopics,
+              child: FutureBuilder<List<SubCategory>>(
+                future: futureSubcategories,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('No topics available');
+                    return const Text('No subcategories available');
                   } else {
-                    final topics = snapshot.data!;
-                    debugPrint("Number of Topics: ${topics.length}");
+                    final List<SubCategory> subcategories = snapshot.data!;
+                    debugPrint("Number of Topics: ${subcategories.length}");
                     return ListView.builder(
-                      itemCount: topics.length + 1,
+                      itemCount: subcategories.length + 1,
                       itemBuilder: (context, index) {
-                        if (index == topics.length) {
+                        if (index == subcategories.length) {
                           return const SizedBox(
                             height: 160,
                           );
                         }
-                        final topic = topics[index];
-                        final topicName = topic.name ?? "Unknown Module";
-                        final category = topic.category ?? "Category not found";
-                        final id = topic.id ?? "Unknown ID";
+                        final subCategory = subcategories[index];
+                        final subcategoryName = subCategory.name ?? "Unknown SubCategory";
+                        final subcategoryId = subCategory.subcategoryId ?? 0;
                         return Column(
                           children: [
                             InkWell(
                               onTap: () async {
                                 //print("Downloading ${moduleData[index].downloadLink}");
-                                if (category.isNotEmpty) {
+                                if (subcategoryName.isNotEmpty) {
                                   // String fileName = "$moduleName.zip";
                                   // await downloadModule(downloadLink, fileName);
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ModuleByTopic(topicName: topicName, id: id)));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ModuleByTopic(subcategoryName: subcategoryName, subcategoryId: subcategoryId)));
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('No category found for ${topics[index].category}')),
+                                    SnackBar(content: Text('No subcategory found for ${subcategories[index].categoryId}')),
                                   );
                                 }
                               },
                               child: Center(
                                 child: ListTile(
                                   title: Text(
-                                    topicName,
+                                    subcategoryName,
                                     style: TextStyle(
                                       fontSize: screenWidth * 0.074,
                                       fontWeight: FontWeight.w500,
@@ -348,49 +350,51 @@ class _TopicListState extends State<TopicList> {
               decoration: BoxDecoration(
                 color: Colors.transparent,
               ),
-              child: FutureBuilder<List<Topic>>(
-                future: futureTopics,
+              child: FutureBuilder<List<SubCategory>>(
+                future: futureSubcategories,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('No topics available');
+                    return const Text('No subcategories available');
                   } else {
-                    final topics = snapshot.data!;
-                    debugPrint("Number of Topics: ${topics.length}");
+                    final List<SubCategory> subcategories = snapshot.data!;
+                    debugPrint("Number of Topics: ${subcategories.length}");
                     return ListView.builder(
-                      itemCount: topics.length + 1,
+                      itemCount: subcategories.length + 1,
                       itemBuilder: (context, index) {
-                        if (index == topics.length) {
+                        if (index == subcategories.length) {
                           return const SizedBox(
                             height: 160,
                           );
                         }
-                        final topic = topics[index];
-                        final topicName = topic.name ?? "Unknown Module";
-                        final category = topic.category ?? "Category not found";
-                        final id = topic.id ?? "Unknown ID";
+                        // final topic = topics[index];
+                        // final topicName = topic.name ?? "Unknown Module";
+                        // final category = topic.category ?? "Category not found";
+                        // final id = topic.id ?? "Unknown ID";
+                        final subCategory = subcategories[index];
+                        final subcategoryName = subCategory.name ?? "Unknown SubCategory";
                         return Column(
                           children: [
                             InkWell(
                               onTap: () async {
                                 //print("Downloading ${moduleData[index].downloadLink}");
-                                if (category.isNotEmpty) {
+                                if (subcategoryName.isNotEmpty) {
                                   // String fileName = "$moduleName.zip";
                                   // await downloadModule(downloadLink, fileName);
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ModuleByTopic(topicName: topicName, id: id)));
+                                  //Navigator.push(context, MaterialPageRoute(builder: (context) => ModuleByTopic(topicName: topicName, id: id)));
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('No category found for ${topics[index].category}')),
+                                    SnackBar(content: Text('No category found for ${subcategories[index].categoryId}')),
                                   );
                                 }
                               },
                               child: Center(
                                 child: ListTile(
                                   title: Text(
-                                    topicName,
+                                    subcategoryName,
                                     style: TextStyle(
                                       fontSize: baseSize * (isTablet(context) ? 0.0667 : 0.0667),
                                       fontFamilyFallback: [

@@ -11,8 +11,13 @@ import 'module_library.dart';
 
 class DownloadConfirm extends StatefulWidget {
   //const DownloadConfirm({Key? key}) : super(key: key);
-  const DownloadConfirm({super.key, required this.moduleName});
-  final String moduleName;
+  const DownloadConfirm({
+    super.key,
+    this.moduleName,
+    this.packageName
+  });
+  final String? moduleName;
+  final String? packageName;
 
   @override
   State<DownloadConfirm> createState() => _DownloadConfirmState();
@@ -24,6 +29,8 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
     bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    String? displayName = widget.moduleName ?? widget.packageName;
 
     return Scaffold(
       body: SafeArea(
@@ -80,8 +87,8 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
                       Expanded(
                         child: Center(
                           child: isLandscape
-                              ? _buildLandscapeLayout(screenWidth, screenHeight)
-                              : _buildPortraitLayout(screenWidth, screenHeight),
+                              ? _buildLandscapeLayout(screenWidth, screenHeight, displayName)
+                              : _buildPortraitLayout(screenWidth, screenHeight, displayName),
                         ),
                       ),
                     ],
@@ -118,7 +125,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
     );
   }
 
-  Widget _buildPortraitLayout(screenWidth, screenHeight) {
+  Widget _buildPortraitLayout(screenWidth, screenHeight, String? displayName) {
     var baseSize = MediaQuery.of(context).size.shortestSide;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,7 +144,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
           textAlign: TextAlign.center,
         ),
         SizedBox(
-          height: baseSize * (isTablet(context) ? 0.015 : 0.025),
+          height: baseSize * (isTablet(context) ? 0.015 : 0.005),
         ),
         Container(
           //height: 150,
@@ -146,9 +153,8 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
           alignment: Alignment.center,
           child: Center(
             child: Text(
-              widget.moduleName,
+              displayName ?? "No Name Provided",
               style: TextStyle(
-                //fontSize: 36,
                 fontSize: baseSize * (isTablet(context) ? 0.055 : 0.07),
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF0070C0),
@@ -158,7 +164,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
           ),
         ),
         SizedBox(
-          height: baseSize * (isTablet(context) ? 0.04 : 0.02),
+          height: baseSize * (isTablet(context) ? 0.04 : 0.01),
         ),
         Flexible(
           child: Container(
@@ -181,7 +187,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ModuleLibrary()));
                     },
                     child: Container(
-                      height: baseSize * (isTablet(context) ? 0.075 : 0.085),
+                      height: baseSize * (isTablet(context) ? 0.075 : 0.095),
                       width: baseSize * (isTablet(context) ? 0.33 : 0.4),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
@@ -228,7 +234,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const MyHomePage()));
                     },
                     child: Container(
-                      height: baseSize * (isTablet(context) ? 0.075 : 0.085),
+                      height: baseSize * (isTablet(context) ? 0.075 : 0.095),
                       width: baseSize * (isTablet(context) ? 0.33 : 0.4),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
@@ -269,7 +275,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
     );
   }
 
-  Widget _buildLandscapeLayout(screenWidth, screenHeight) {
+  Widget _buildLandscapeLayout(screenWidth, screenHeight, String? displayName) {
     var baseSize = MediaQuery.of(context).size.shortestSide;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -297,7 +303,7 @@ class _DownloadConfirmState extends State<DownloadConfirm> {
           alignment: Alignment.center,
           child: Center(
             child: Text(
-              widget.moduleName,
+              displayName ?? "No Name Provided",
               style: TextStyle(
                 //fontSize: 36,
                 fontSize: baseSize * (isTablet(context) ? 0.065 : 0.065),

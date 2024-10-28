@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wired_mobile/pages/by_packages.dart';
 import 'package:wired_mobile/pages/home_page.dart';
 import 'package:wired_mobile/pages/policy.dart';
 import '../utils/button.dart';
@@ -156,8 +157,8 @@ class _SearchState extends State<Search> {
         ),
         CustomButton(
           onTap: () {
-            print('Topic button pressed');
-            //Navigator.push(context, MaterialPageRoute(builder: (context) => Search()));
+            print('Package button pressed');
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ByPackages()));
           },
           gradientColors: [
             Color(0xFF0070C0),

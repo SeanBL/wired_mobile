@@ -15,41 +15,37 @@ import 'module_info.dart';
 import 'module_library.dart';
 
 class ModuleByTopic extends StatefulWidget {
-  final String topicName;
-  final String id;
+  final String subcategoryName;
+  final int subcategoryId;
 
-  const ModuleByTopic({Key? key, required this.topicName, required this.id}) : super(key: key);
+  const ModuleByTopic({Key? key, required this.subcategoryName, required this.subcategoryId}) : super(key: key);
   @override
   _ModuleByTopicState createState() => _ModuleByTopicState();
 }
 
 class Modules {
+  int? moduleId;
   String? description;
-  List<String>? topics;
   String? name;
-  String? topic;
   String? downloadLink;
 
   Modules({
+    int? moduleId,
     this.description,
-    this.topics,
     this.name,
-    this.topic,
     this.downloadLink
   });
 
   Modules.fromJson(Map<String, dynamic> json)
-      : description = json['description'] as String?,
-        topics = json['topics'] != null ? List<String>.from(json['topics']) : null,
+      : moduleId = json['id'] as int?,
+        description = json['description'] as String?,
         name = json['name'] as String?,
-        topic = json['topic'] as String?,
         downloadLink = json['downloadLink'] as String?;
 
   Map<String, dynamic> toJson() => {
+    'moduleId': moduleId,
     'description': description,
-    'topics': topics,
     'name': name,
-    'topic': topic,
     'downloadLink': downloadLink,
   };
 }
@@ -61,7 +57,7 @@ class _ModuleByTopicState extends State<ModuleByTopic> {
   Future<List<Modules>> fetchModules() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://obrpqbo4eb.execute-api.us-west-2.amazonaws.com/api/modules'));
+          'http://10.0.2.2:3000/modules?subcategoryId=${widget.subcategoryId}'));
 
       debugPrint("Response body: ${response.body}");
 
@@ -73,23 +69,10 @@ class _ModuleByTopicState extends State<ModuleByTopic> {
 
         // Ensure that the data is a List
         if (data is List) {
-          print("Data is a List");
           List<Modules> allModules = data.map<Modules>((e) => Modules.fromJson(e)).toList();
 
-          // Filter out modules with null or empty names
-          //allModules = allModules.where((m) => m.name != null && m.name!.isNotEmpty).toList();
-
-          debugPrint("Filtering by topicId: ${widget.id}");
-
-          // Filter modules by the id
-          allModules = allModules.where((module) => module.topics != null && module.topics!.contains(widget.id)).toList();
-
-          debugPrint("Modules after filtering by topicId: ${allModules.length}");
-
-          // change to lower case and Sort modules by name
+          // Sort modules by name
           allModules.sort((a, b) => a.name!.compareTo(b.name!));
-
-          debugPrint("Parsed Modules Length: ${allModules.length}");
 
           setState(() {
             moduleData = allModules;  // Update the moduleData list here
@@ -116,9 +99,7 @@ class _ModuleByTopicState extends State<ModuleByTopic> {
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
-    bool isLandscape = MediaQuery
-        .of(context)
-        .orientation == Orientation.landscape;
+    bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       body: SafeArea(
@@ -224,7 +205,7 @@ class _ModuleByTopicState extends State<ModuleByTopic> {
           child: Column(
             children: [
               Text(
-                widget.topicName,
+                widget.subcategoryName,
                 style: TextStyle(
                   fontSize: screenWidth * 0.085,
                   fontWeight: FontWeight.w500,
@@ -344,7 +325,7 @@ class _ModuleByTopicState extends State<ModuleByTopic> {
           child: Column(
             children: [
               Text(
-                widget.topicName,
+                widget.subcategoryName,
                 style: TextStyle(
                   fontSize: baseSize * (isTablet(context) ? 0.07 : 0.07),
                   fontWeight: FontWeight.w500,
