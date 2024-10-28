@@ -18,24 +18,16 @@ class ByAlphabet extends StatefulWidget {
 }
 
 class Album {
-  final String description;
-  final String id;
   final String name;
 
   Album({
-    required this.description,
-    required this.id,
     required this.name
   });
 
   Album.fromJson(Map<String, dynamic> json)
-      : description = json['description'] as String,
-        id = json['id'] as String,
-        name = json['name'] as String;
+      :name = json['name'] as String;
 
     Map<String, dynamic> toJson() => {
-      'description': description,
-      'id': id,
       'name': name,
     };
 }
@@ -45,22 +37,37 @@ class _ByAlphabetState extends State<ByAlphabet> {
   late List<Album> albums = [];
 
   Future<List<Album>> fetchAlbums() async {
-    try {
-      final response = await http.get(Uri.parse(
-          'https://obrpqbo4eb.execute-api.us-west-2.amazonaws.com/api/letters'));
+    // Hardcoded list of albums from A to W and X-Y-Z
+    albums = [
+      Album(name: 'A'),
+      Album(name: 'B'),
+      Album(name: 'C'),
+      Album(name: 'D'),
+      Album(name: 'E'),
+      Album(name: 'F'),
+      Album(name: 'G'),
+      Album(name: 'H'),
+      Album(name: 'I'),
+      Album(name: 'J'),
+      Album(name: 'K'),
+      Album(name: 'L'),
+      Album(name: 'M'),
+      Album(name: 'N'),
+      Album(name: 'O'),
+      Album(name: 'P'),
+      Album(name: 'Q'),
+      Album(name: 'R'),
+      Album(name: 'S'),
+      Album(name: 'T'),
+      Album(name: 'U'),
+      Album(name: 'V'),
+      Album(name: 'W'),
+      Album(name: 'X-Y-Z'),
+    ];
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        albums = data.map<Album>((e) => Album.fromJson(e)).toList();
-        albums.sort((a, b) => a.name.compareTo(b.name));
-        return albums;
-      } else {
-        debugPrint("Failed to load albums");
-      }
-      return albums;
-    } catch (e) {
-      debugPrint("$e");
-    }
+    // Sorting alphabetically if needed
+    albums.sort((a, b) => a.name.compareTo(b.name));
+
     return albums;
   }
 
@@ -211,7 +218,6 @@ class _ByAlphabetState extends State<ByAlphabet> {
                             MaterialPageRoute(
                               builder: (context) => ModuleByAlphabet(
                                 letter: albums[index].name,
-                                letterId: albums[index].id,
                               ),
                             ),
                           );
@@ -318,7 +324,6 @@ class _ByAlphabetState extends State<ByAlphabet> {
                             MaterialPageRoute(
                               builder: (context) => ModuleByAlphabet(
                                 letter: albums[index].name,
-                                letterId: albums[index].id,
                               ),
                             ),
                           );

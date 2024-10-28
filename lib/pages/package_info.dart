@@ -16,52 +16,46 @@ import '../utils/functions.dart';
 import '../utils/side_nav_bar.dart';
 import 'download_confirm.dart';
 import 'module_library.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
-class ModuleInfo extends StatefulWidget {
-  final String moduleName;
-  final String moduleDescription;
+class PackageInfo extends StatefulWidget {
+  final String packageName;
+  final String packageDescription;
   final String? downloadLink;
 
-  ModuleInfo({required this.moduleName, required this.moduleDescription, this.downloadLink});
+  PackageInfo({required this.packageName, required this.packageDescription, this.downloadLink});
 
   @override
-  _ModuleInfoState createState() => _ModuleInfoState();
+  _PackageInfoState createState() => _PackageInfoState();
 }
 
-class Modules {
+class Packages {
   String? name;
   String? description;
   String? downloadLink;
-  //String? letters;
-  List<String>? letters;
 
-  Modules({
+  Packages({
     this.name,
     this.description,
     this.downloadLink,
-    this.letters,
   });
 
-  Modules.fromJson(Map<String, dynamic> json)
+  Packages.fromJson(Map<String, dynamic> json)
       : name = json['name'] as String,
         description = json['description'] as String,
-        downloadLink = json['downloadLink'] as String,
-        letters = (json['letters'] as List<dynamic>?)?.map((e) => e as String).toList();
+        downloadLink = json['downloadLink'] as String;
 
 
   Map<String, dynamic> toJson() => {
     'name': name,
     'description': description,
     'downloadLink': downloadLink,
-    'letters': letters,
   };
 }
 
-class _ModuleInfoState extends State<ModuleInfo> {
-  late Future<Modules> futureModule;
-  late List<Modules> moduleData = [];
-  final GlobalKey _moduleNameKey = GlobalKey();
+class _PackageInfoState extends State<PackageInfo> {
+  late Future<Packages> futurePackage;
+  late List<Packages> packageData = [];
+  final GlobalKey _packageNameKey = GlobalKey();
   double topPadding = 0;
   bool _isLoading = false;
 
@@ -74,8 +68,8 @@ class _ModuleInfoState extends State<ModuleInfo> {
     return status.isGranted;
   }
 
-  // Download the Module
-  Future<void> downloadModule(String url, String fileName) async {
+  // Download the Package
+  Future<void> downloadPackage(String url, String fileName) async {
     bool hasPermission = await checkAndRequestStoragePermission();
     print("Has Permission: $hasPermission");
     if (true) {
@@ -148,23 +142,23 @@ class _ModuleInfoState extends State<ModuleInfo> {
     super.initState();
     // Use addPostFrameCallback to get the height after the first build
     // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   final RenderBox renderBox = _moduleNameKey.currentContext?.findRenderObject() as RenderBox;
-    //   final double moduleNameHeight = renderBox.size.height;
-    //   print('Module Name Container Height: $moduleNameHeight');
+    //   final RenderBox renderBox = _packageNameKey.currentContext?.findRenderObject() as RenderBox;
+    //   final double packageNameHeight = renderBox.size.height;
+    //   print('Package Name Container Height: $packageNameHeight');
     //   // Use addPostFrameCallback to get the height after the first build
     //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     if (_moduleNameKey.currentContext?.findRenderObject() != null) {
-    //       final RenderBox renderBox = _moduleNameKey.currentContext!.findRenderObject() as RenderBox;
-    //       final double moduleNameHeight = renderBox.size.height;
-    //       final double moduleNameWidth = renderBox.size.width;
-    //       final double aspectRatio = moduleNameWidth / moduleNameHeight;
+    //     if (_packageNameKey.currentContext?.findRenderObject() != null) {
+    //       final RenderBox renderBox = _packageNameKey.currentContext!.findRenderObject() as RenderBox;
+    //       final double packageNameHeight = renderBox.size.height;
+    //       final double packageNameWidth = renderBox.size.width;
+    //       final double aspectRatio = packageNameWidth / packageNameHeight;
     //
-    //       // Calculate the top padding based on the module name container height
+    //       // Calculate the top padding based on the package name container height
     //       setState(() {
-    //         if (moduleNameHeight > 55 && moduleNameHeight < 90) {
+    //         if (packageNameHeight > 55 && packageNameHeight < 90) {
     //           //topPadding = 145;
     //           topPadding = MediaQuery.of(context).size.height * 0.15;
-    //         } else if (moduleNameHeight >= 141) {
+    //         } else if (packageNameHeight >= 141) {
     //           //topPadding = 231;
     //           topPadding = MediaQuery.of(context).size.height * 0.23;
     //         } else {
@@ -173,9 +167,9 @@ class _ModuleInfoState extends State<ModuleInfo> {
     //         }
     //       });
     //
-    //       // Print the module name height and calculated topPadding
-    //       print('Module Name Container Height: $moduleNameHeight');
-    //       print('Module Name Container Width: $moduleNameWidth');
+    //       // Print the package name height and calculated topPadding
+    //       print('Package Name Container Height: $packageNameHeight');
+    //       print('Package Name Container Width: $packageNameWidth');
     //
     //       print('Calculated Top Padding: $topPadding');
     //     } else {
@@ -186,7 +180,7 @@ class _ModuleInfoState extends State<ModuleInfo> {
     // });
   }
 
-// Consider using AutoSizeText for the module name instead of RichText
+// Consider using AutoSizeText for the package name instead of RichText
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +276,7 @@ class _ModuleInfoState extends State<ModuleInfo> {
           height: screenHeight * 0.031,
         ),
 
-        // Module Description Container
+        // Package Description Container
         Flexible(
           child: Stack(
             children: [
@@ -307,9 +301,9 @@ class _ModuleInfoState extends State<ModuleInfo> {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '${widget.moduleName}\n',
+                              text: '${widget.packageName}\n',
                               style: TextStyle(
-                                fontSize: 32.0,
+                                fontSize: 24.0,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xFF0070C0),
                               ),
@@ -320,7 +314,7 @@ class _ModuleInfoState extends State<ModuleInfo> {
                               ),
                             ),
                             TextSpan(
-                              text: '${widget.moduleDescription}\n',
+                              text: '${widget.packageDescription}\n',
                               style: TextStyle(
                                 fontSize: 24.0,
                                 fontWeight: FontWeight.w500,
@@ -379,8 +373,8 @@ class _ModuleInfoState extends State<ModuleInfo> {
                           _isLoading = true;
                         });
 
-                        String fileName = "$widget.moduleName.zip";
-                        await downloadModule(
+                        String fileName = "$widget.packageName.zip";
+                        await downloadPackage(
                             widget.downloadLink!, fileName);
 
                         setState(() {
@@ -391,14 +385,14 @@ class _ModuleInfoState extends State<ModuleInfo> {
                             MaterialPageRoute(
                                 builder: (context) =>
                                     DownloadConfirm(
-                                        moduleName: widget
-                                            .moduleName)));
+                                        packageName: widget
+                                            .packageName)));
                       } else {
                         ScaffoldMessenger.of(context)
                             .showSnackBar(
                           SnackBar(content: Text(
                               'No download link found for ${widget
-                                  .moduleName}')),
+                                  .packageName}')),
                         );
                       }
                     },
@@ -481,7 +475,7 @@ class _ModuleInfoState extends State<ModuleInfo> {
           height: screenHeight * 0.031,
         ),
 
-        // Module Description Container
+        // Package Description Container
         Flexible(
           child: Stack(
             children: [
@@ -506,7 +500,7 @@ class _ModuleInfoState extends State<ModuleInfo> {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '${widget.moduleName}\n',
+                              text: '${widget.packageName}\n',
                               style: TextStyle(
                                 //fontSize: 32.0,
                                 fontSize: baseSize * (isTablet(context) ? 0.052 : 0.052),
@@ -520,7 +514,7 @@ class _ModuleInfoState extends State<ModuleInfo> {
                               ),
                             ),
                             TextSpan(
-                              text: '${widget.moduleDescription}\n',
+                              text: '${widget.packageDescription}\n',
                               style: TextStyle(
                                 fontSize: baseSize * (isTablet(context) ? 0.032 : 0.032),
                                 fontWeight: FontWeight.w500,
@@ -579,8 +573,8 @@ class _ModuleInfoState extends State<ModuleInfo> {
                           _isLoading = true;
                         });
 
-                        String fileName = "$widget.moduleName.zip";
-                        await downloadModule(
+                        String fileName = "$widget.packageName.zip";
+                        await downloadPackage(
                             widget.downloadLink!, fileName);
 
                         setState(() {
@@ -591,14 +585,14 @@ class _ModuleInfoState extends State<ModuleInfo> {
                             MaterialPageRoute(
                                 builder: (context) =>
                                     DownloadConfirm(
-                                        moduleName: widget
-                                            .moduleName)));
+                                        packageName: widget
+                                            .packageName)));
                       } else {
                         ScaffoldMessenger.of(context)
                             .showSnackBar(
                           SnackBar(content: Text(
                               'No download link found for ${widget
-                                  .moduleName}')),
+                                  .packageName}')),
                         );
                       }
                     },
@@ -667,4 +661,3 @@ class _ModuleInfoState extends State<ModuleInfo> {
     );
   }
 }
-
