@@ -110,11 +110,11 @@ class _SearchState extends State<Search> {
           height: screenHeight * 0.038,
         ),
         Hero(
-          tag: 'search',
+          tag: 'modules',
           child: Text(
-            'Search Modules',
+            'Modules',
             style: TextStyle(
-              fontSize: screenWidth * 0.1,
+              fontSize: screenWidth * 0.09,
               fontWeight: FontWeight.w500,
               color: Color(0xFF0070C0),
             ),
