@@ -200,6 +200,7 @@ class _TopicListState extends State<TopicList> {
   }
 
   Widget _buildPortraitLayout(screenWidth, screenHeight) {
+    var baseSize = MediaQuery.of(context).size.shortestSide;
     return Column(
       children: [
         Container(
@@ -269,7 +270,7 @@ class _TopicListState extends State<TopicList> {
                                   title: Text(
                                     subcategoryName,
                                     style: TextStyle(
-                                      fontSize: screenWidth * 0.074,
+                                      fontSize: baseSize * (isTablet(context) ? 0.75 : 0.054),
                                       fontWeight: FontWeight.w500,
                                       color: Color(0xFF0070C0),
                                     ),
@@ -278,9 +279,10 @@ class _TopicListState extends State<TopicList> {
                                 ),
                               ),
                             ),
-                            const Divider(
+                            Container(
                               color: Colors.grey,
                               height: 1,
+                              width: baseSize * (isTablet(context) ? 0.75 : 0.85),
                             ),
                           ],
                         );
